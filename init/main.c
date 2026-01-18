@@ -129,7 +129,7 @@ void init(void)
 	(void) dup(0);
 	printf("%d buffers = %d bytes buffer space\n\r",NR_BUFFERS,
 		NR_BUFFERS*BLOCK_SIZE);
-	printf(" Ok.\n\r");
+	printf(" Rhee Creatives linux v1.0 is now running! - 20260118\n\r");
 	if ((i=fork())<0)
 		printf("Fork failed in init\r\n");
 	else if (!i) {
