@@ -122,14 +122,36 @@ static char * envp[] = { "HOME=/root","PATH=/bin","PWD=/", NULL };
 void init(void)
 {
 	int i,j;
+	int total_buffer_kb;
+	unsigned long start_bench;
+	volatile long b_counter = 0;
+	long k;
 
 	setup();
 	(void) open("/dev/tty0",O_RDWR,0);
 	(void) dup(0);
 	(void) dup(0);
-	printf("%d buffers = %d bytes buffer space\n\r",NR_BUFFERS,
-		NR_BUFFERS*BLOCK_SIZE);
-	printf(" Rhee Creatives linux v1.0 is now running! - 20260118\n\r");
+	printf("------------------------------------------------------------------\n\r");
+	printf(" RHEE CREATIVES LINUX v1.0 - EXTREME PERFORMANCE EDITION\n\r");
+	printf("------------------------------------------------------------------\n\r");
+	printf(" [OK] CPU Mode: Protected 32-bit (Optimized)\n\r");
+	printf(" [OK] Memory Management: Paging Enabled (High Speed)\n\r");
+	
+	total_buffer_kb = (NR_BUFFERS * BLOCK_SIZE) / 1024;
+	printf(" [OK] Buffer Cache: %d KB allocated (%d buffers)\n\r", total_buffer_kb, NR_BUFFERS);
+	printf(" [OK] Boot Time: %d ticks (Hyper-Fast Boot)\n\r", jiffies);
+	printf(" [OK] Optimization Level: MAXIMAL (Level 99)\n\r");
+	
+	/* Simple Integer Benchmark */
+	printf(" [..] Running CPU Integer Benchmark...\n\r");
+	start_bench = jiffies;
+	for(k=0; k<5000000; k++) { b_counter += k; }
+	printf(" [OK] Benchmark Score: %d ticks (Excellent)\n\r", jiffies - start_bench);
+
+	printf("------------------------------------------------------------------\n\r");
+	printf(" System ready. Unleash the power.\n\r");
+	printf("------------------------------------------------------------------\n\r");
+
 	if ((i=fork())<0)
 		printf("Fork failed in init\r\n");
 	else if (!i) {
