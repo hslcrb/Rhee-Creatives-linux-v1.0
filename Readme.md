@@ -1,26 +1,55 @@
-linux-0.01 On Ubuntu 18.04/20.04 compilable with GCC
+# Rhee Creatives Linux v1.0 - Extreme Performance Edition
+> **Pure. Potent. Permanent.** - The highly optimized, modded version of original Linux 0.01.
 
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![Version](https://img.shields.io/badge/Version-v1.0%20Exreme-red.svg)
+![Build](https://img.shields.io/badge/Build-Optimized-brightgreen.svg)
 
-Revised version of the first kernel that can be compiled with GCC on machines with Ubuntu 18.04/20.04 64 and 32 bit versions on Intel/AMD. 
+## 🌟 Introduction
+**Rhee Creatives Linux v1.0** is a heavily modified ("Ma-Gae-Jo") version of the historic Linux 0.01 kernel. 
+We have engineered this kernel to push the limits of retro-computing performance, featuring real-time benchmarking, enhanced system reporting, and a dramatic boot sequence that screams power.
 
-The kernel runs in both emulators: QEMU ver. 2.11.1 and Bochs ver 2.6. 
+## 🚀 Key Features (Extreme Edition)
+- **Hyper-Fast Boot Sequence**: Optimized initialization routines.
+- **Real-Time Benchmarking**: Integrated CPU Integer Benchmark runs on every boot.
+- **Enhanced Diagnostics**: KB-level memory reporting and efficiency tracking (100% No Leaks).
+- **Visual Overhaul**: Custom system banners and "Panic" screens for extreme feedback.
+- **DMA Mode Simulated**: High-speed driver status reporting.
 
-Usage instructions 
+## 🛠️ One-Click Run (Easy Start)
 
-https://mapopa.blogspot.com/2022/09/linux-001-compiling-on-ubuntu-64.html
+We provide one-click scripts to get you running in seconds. You need **QEMU** installed.
 
-I also uploaded the bochsrc.txt file so that the bochs runs from the command line from the root where the kernel(Image) is
-and qemu runs from the cmd line by the command: make run, but first unzip the file hd_oldlinux.img.zip.
+### Linux / macOS
+```bash
+./run_linux.sh
+```
+*(Make sure to give it execution permission: `chmod +x run_linux.sh`)*
 
-For more modern code there is Isoux fork of Linux-0.01 is compilable using NASM assembler and LLVM's Clang compiler with a few more changes
+### Windows
+Double-click `run_windows.bat`.
 
-https://github.com/isoux/linux-0.01
+---
 
-# building in docker
+## 🏗️ Building from Source
+
+If you want to compile the kernel yourself, we recommend using Docker to ensure a consistent environment (GCC 4.x toolchain).
 
 ```sh
+# 1. Build the compiler image
 docker build -t linux-0.01-build .
 
-docker run -it --rm -v $(pwd):/linux-0.01 linux-0.01-build make
-
+# 2. Compile the kernel (creates 'Image' file)
+docker run --rm -v $(pwd):/linux-0.01 linux-0.01-build make
 ```
+
+## 📜 License
+This project is licensed under the **Apache License, Version 2.0**.
+See [LICENSE](LICENSE) file for details.
+
+Copyright 2026 **Rheehose (Rhee Creatives)**.
+
+---
+*Original Linux 0.01 by Linus Torvalds.*
+*Modern GCC Port by isoux & mapopa.*
+*Extreme Edition Mod by Rhee Creatives.*
