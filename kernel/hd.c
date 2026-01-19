@@ -419,5 +419,5 @@ void hd_init(void)
 	set_trap_gate(0x2E,&hd_interrupt);
 	outb_p(inb_p(0x21)&0xfb,0x21);
 	outb(inb_p(0xA1)&0xbf,0xA1);
-	printk(" [OK] HD Controller: High-Speed Driver Loaded (DMA Mode Active)\n\r");
+	printk(" [OK] HD Controller: High-Speed Driver Loaded (DMA Mode Active)\n\r"); /* 20260119: HD status report */
 }

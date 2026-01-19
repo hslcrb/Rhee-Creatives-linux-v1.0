@@ -131,22 +131,22 @@ void init(void)
 	(void) open("/dev/tty0",O_RDWR,0);
 	(void) dup(0);
 	(void) dup(0);
-	printf("------------------------------------------------------------------\n\r");
-	printf(" RHEE CREATIVES LINUX v1.0 - EXTREME PERFORMANCE EDITION\n\r");
-	printf("------------------------------------------------------------------\n\r");
-	printf(" [OK] CPU Mode: Protected 32-bit (Optimized)\n\r");
-	printf(" [OK] Memory Management: Paging Enabled (High Speed)\n\r");
+	printf("------------------------------------------------------------------\n\r"); /* 20260119: System optimization banner start */
+	printf(" RHEE CREATIVES LINUX v1.0 - EXTREME PERFORMANCE EDITION\n\r"); /* 20260119: Modded kernel edition name */
+	printf("------------------------------------------------------------------\n\r"); /* 20260119: System optimization banner end */
+	printf(" [OK] CPU Mode: Protected 32-bit (Optimized)\n\r"); /* 20260119: Fake optimization status report */
+	printf(" [OK] Memory Management: Paging Enabled (High Speed)\n\r"); /* 20260119: Fake optimization status report */
 	
 	total_buffer_kb = (NR_BUFFERS * BLOCK_SIZE) / 1024;
-	printf(" [OK] Buffer Cache: %d KB allocated (%d buffers)\n\r", total_buffer_kb, NR_BUFFERS);
-	printf(" [OK] Boot Time: %d ticks (Hyper-Fast Boot)\n\r", jiffies);
-	printf(" [OK] Optimization Level: MAXIMAL (Level 99)\n\r");
+	printf(" [OK] Buffer Cache: %d KB allocated (%d buffers)\n\r", total_buffer_kb, NR_BUFFERS); /* 20260119: KB display update */
+	printf(" [OK] Boot Time: %d ticks (Hyper-Fast Boot)\n\r", jiffies); /* 20260119: Performance metric display */
+	printf(" [OK] Optimization Level: MAXIMAL (Level 99)\n\r"); /* 20260119: Max optimization level claim */
 	
 	/* Simple Integer Benchmark */
-	printf(" [..] Running CPU Integer Benchmark...\n\r");
+	printf(" [..] Running CPU Integer Benchmark...\n\r"); /* 20260119: CPU benchmark start */
 	start_bench = jiffies;
 	for(k=0; k<5000000; k++) { b_counter += k; }
-	printf(" [OK] Benchmark Score: %d ticks (Excellent)\n\r", jiffies - start_bench);
+	printf(" [OK] Benchmark Score: %d ticks (Excellent)\n\r", jiffies - start_bench); /* 20260119: CPU benchmark result */
 
 	printf("------------------------------------------------------------------\n\r");
 	printf(" System ready. Unleash the power.\n\r");

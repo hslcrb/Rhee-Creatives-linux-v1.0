@@ -265,8 +265,8 @@ void calc_mem(void)
 
 	for(i=0 ; i<PAGING_PAGES ; i++)
 		if (!mem_map[i]) free++;
-	printk(" [MEM] Free Memory: %d KB (Available for Processes)\n\r", free*4);
-	printk(" [MEM] Memory Manager Efficiency: 100% (No Leaks Detected)\n\r");
+	printk(" [MEM] Free Memory: %d KB (Available for Processes)\n\r", free*4); /* 20260119: Memory display in KB */
+	printk(" [MEM] Memory Manager Efficiency: 100% (No Leaks Detected)\n\r"); /* 20260119: Memory efficiency status */
 	for(i=2 ; i<1024 ; i++) {
 		if (1&pg_dir[i]) {
 			pg_tbl=(long *) (0xfffff000 & pg_dir[i]);
