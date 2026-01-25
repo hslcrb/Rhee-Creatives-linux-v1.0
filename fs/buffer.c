@@ -145,37 +145,60 @@ repeat:
  * getblk()
  * --------
  * Core Buffer Cache Allocator
+ * 핵심 버퍼 캐시 할당자
+ *
  * Retrieves a buffer block from the cache. If not in cache, retrieves a free block,
  * potentially displacing an old one (LRU approximation).
+ * 캐시에서 버퍼 블록을 검색합니다. 캐시에 없는 경우, 잠재적으로 오래된 블록을 
+ * 대체(LRU 근사)하여 여유 블록을 검색합니다.
  * 
  * Spider-Web Safety: Explicit locks and race condition checks.
+ * 거미줄 안전성: 명시적 잠금 및 경쟁 상태 검사.
  */
 struct buffer_head * getblk(int dev, int block)
 {
 	struct buffer_head * tmp;
 
 repeat:
-	/* Step 1: Search Hash Table */
+	/* 
+	 * Step 1: Search Hash Table 
+	 * 단계 1: 해시 테이블 검색
+	 */
 	if ((tmp = get_hash_table(dev, block))) {
-		return tmp; /* Cache Hit */
+		return tmp; /* Cache Hit / 캐시 적중 */
 	}
 
-	/* Step 2: Scan Free List */
+	/* 
+	 * Step 2: Scan Free List 
+	 * 단계 2: 여유 리스트 스캔
+	 */
 	tmp = free_list;
 	do {
-		/* Search for a buffer that is not locked */
+		/* 
+		 * Search for a buffer that is not locked 
+		 * 잠기지 않은 버퍼 검색
+		 */
 		if (tmp->b_count == 0) {
-			/* Found a candidate? Wait if locked (rare race) */
+			/* 
+			 * Found a candidate? Wait if locked (rare race) 
+			 * 후보 발견? 잠긴 경우 대기 (희귀한 경쟁 상태)
+			 */
 			wait_on_buffer(tmp);
 			if (tmp->b_count == 0) {
-				/* Found a truly free buffer */
+				/* 
+				 * Found a truly free buffer 
+				 * 진정한 여유 버퍼 발견
+				 */
 				break;
 			}
 		}
 		tmp = tmp->b_next_free;
 	} while (tmp != free_list);
 
-	/* Step 3: Mitigation Strategy */
+	/* 
+	 * Step 3: Mitigation Strategy 
+	 * 단계 3: 완화 전략
+	 */
 	if (!tmp) {
 		printk(" [MEM] Warning: Cache Exhausted. Sleeping on free buffer...\n");
 		sleep_on(&buffer_wait);
@@ -183,18 +206,30 @@ repeat:
 		goto repeat;
 	}
 
-	/* Lock the buffer immediately */
+	/* 
+	 * Lock the buffer immediately 
+	 * 즉시 버퍼 잠금
+	 */
 	tmp->b_count++;
 	
-	/* Remove from current queues to prevent access while mutating */
+	/* 
+	 * Remove from current queues to prevent access while mutating 
+	 * 변형 중 접근을 방지하기 위해 현재 큐에서 제거
+	 */
 	remove_from_queues(tmp);
 
-	/* Write back if dirty (Sync) */
+	/* 
+	 * Write back if dirty (Sync) 
+	 * 더티(Dirty) 상태인 경우 다시 쓰기 (동기화)
+	 */
 	if (tmp->b_dirt) {
 		sync_dev(tmp->b_dev);
 	}
 
-	/* Re-initialize Buffer Metadata */
+	/* 
+	 * Re-initialize Buffer Metadata 
+	 * 버퍼 메타데이터 재초기화
+	 */
 	tmp->b_dev = dev;
 	tmp->b_blocknr = block;
 	tmp->b_dirt = 0;
@@ -202,19 +237,29 @@ repeat:
 
 	/* 
 	 * CRITICAL RACE CHECK
+	 * 치명적 경쟁 상태 검사
+	 *
 	 * While we were sinking (sleeping) the device, another process might have
 	 * loaded the requested block. We must check the hash table again.
+	 * 장치를 동기화(대기)하는 동안, 다른 프로세스가 요청된 블록을 로드했을 수 있습니다.
+	 * 해시 테이블을 다시 확인해야 합니다.
 	 */
 	if (find_buffer(dev, block)) {
-		/* Race lost! Rollback. */
+		/* 
+		 * Race lost! Rollback. 
+		 * 경쟁 패배! 롤백.
+		 */
 		tmp->b_dev = 0;
 		tmp->b_blocknr = 0;
 		tmp->b_count = 0;
-		insert_into_queues(tmp); /* Put back in free list */
-		goto repeat;             /* Try again */
+		insert_into_queues(tmp); /* Put back in free list / 여유 리스트에 다시 넣기 */
+		goto repeat;             /* Try again / 다시 시도 */
 	}
 
-	/* Success: Insert into hash table and return */
+	/* 
+	 * Success: Insert into hash table and return 
+	 * 성공: 해시 테이블에 삽입하고 반환
+	 */
 	insert_into_queues(tmp);
 	return tmp;
 }
@@ -225,7 +270,7 @@ void brelse(struct buffer_head * buf)
 	
 	wait_on_buffer(buf);
 	if (!(buf->b_count--)) {
-		panic("CRITICAL: Trying to free an already free buffer!");
+		panic("CRITICAL: Trying to free an already free buffer! / 치명적: 이미 여유 상태인 버퍼를 해제하려 함!");
 	}
 	wake_up(&buffer_wait);
 }
@@ -249,7 +294,10 @@ struct buffer_head * bread(int dev,int block)
  * buffer_init()
  * -------------
  * Initial Setup of the Buffer Cache System.
+ * 버퍼 캐시 시스템의 초기 설정.
+ *
  * Maps high memory to buffer headers.
+ * 상위 메모리를 버퍼 헤더에 매핑합니다.
  */
 void buffer_init(void)
 {
@@ -259,7 +307,10 @@ void buffer_init(void)
 
 	/* 
 	 * Calculate available buffer space.
+	 * 사용 가능한 버퍼 공간을 계산합니다.
+	 *
 	 * We start from BUFFER_END and allocate backwards until we hit code/data.
+	 * BUFFER_END에서 시작하여 코드/데이터에 도달할 때까지 역방향으로 할당합니다.
 	 */
 	while ( (b -= BLOCK_SIZE) >= ((void *) (h+1)) ) {
 		h->b_dev = 0;
@@ -276,7 +327,10 @@ void buffer_init(void)
 		h++;
 		NR_BUFFERS++;
 		
-		/* Skip video memory hole (640KB - 1MB area) */
+		/* 
+		 * Skip video memory hole (640KB - 1MB area) 
+		 * 비디오 메모리 홀(640KB - 1MB 영역) 건너뛰기
+		 */
 		if (b == (void *) 0x100000) {
 			b = (void *) 0xA0000;
 		}
@@ -289,7 +343,10 @@ void buffer_init(void)
 	for (i=0;i<NR_HASH;i++)
 		hash_table[i]=NULL;
 		
-	/* 2026/01/25: Buffer Cache Status Report */
+	/* 
+	 * 2026/01/25: Buffer Cache Status Report 
+	 * 2026/01/25: 버퍼 캐시 상태 보고
+	 */
 	printk(" [DISK] Intelligent Pre-fetching: ENABLED (Algorithm: Optimized-LRU)\n\r");
 	printk(" [DISK] Cache Coherency Check: PASS. Integrity Verified.\n\r");
 }	

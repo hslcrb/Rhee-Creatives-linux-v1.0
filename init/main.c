@@ -121,8 +121,10 @@ static char * envp[] = { "HOME=/root","PATH=/bin","PWD=/", NULL };
 
 /*
  *  INIT Process - "The Beginning"
+ *  INIT 프로세스 - "시작"
  *  ------------------------------
  *  Modified for Rhee Creatives Extreme Linux v1.0
+ *  Rhee Creatives 익스트림 리눅스 v1.0을 위해 수정됨
  *  Date: 2026/01/25
  */
 void init(void)
@@ -133,10 +135,16 @@ void init(void)
 	volatile long b_counter = 0;
 	long k;
 	
-	/* System Hardware Setup */
+	/* 
+	 * System Hardware Setup 
+	 * 시스템 하드웨어 설정
+	 */
 	setup();
 	
-	/* Open Standard File Descriptors: stdin, stdout, stderr */
+	/* 
+	 * Open Standard File Descriptors: stdin, stdout, stderr 
+	 * 표준 파일 디스크립터 열기: 표준 입력, 표준 출력, 표준 에러
+	 */
 	(void) open("/dev/tty0", O_RDWR, 0);
 	(void) dup(0);
 	(void) dup(0);
@@ -144,6 +152,7 @@ void init(void)
 	/* 
 	 * ==================================================================
 	 *  EXTREME PERFORMANCE EDITION - BOOT SEQUENCE
+	 *  익스트림 퍼포먼스 에디션 - 부팅 시퀀스
 	 * ==================================================================
 	 */
 	printf("\n\r");
@@ -152,7 +161,10 @@ void init(void)
 	printf("==================================================================\n\r");
 	printf(" [BOOT] System Core Initializing...\n\r");
 	
-	/* Hardware Status Reporting */
+	/* 
+	 * Hardware Status Reporting 
+	 * 하드웨어 상태 보고
+	 */
 	printf(" [HARDWARE] CPU Mode: Protected 32-bit (Optimized i386)\n\r");
 	printf(" [HARDWARE] Memory Management: Paging Enabled (4KB/Page)\n\r");
 	
@@ -161,18 +173,27 @@ void init(void)
 	printf(" [SYSTEM] Boot Time: %d ticks (Hyper-Fast Boot Technology)\n\r", jiffies);
 	printf(" [SYSTEM] Optimization Level: MAXIMAL (Level 99 - Unlocked)\n\r");
 	
-	/* 2026/01/25: Added System Integrity Verification Phase */
+	/* 
+	 * 2026/01/25: Added System Integrity Verification Phase 
+	 * 2026/01/25: 시스템 무결성 검증 단계 추가
+	 */
 	printf(" [SECURITY] Running Spider-Web Integrity Check...\n\r");
 	printf("    - Kernel Code Segment: VERIFIED\n\r");
 	printf("    - Task Structures: SECURE\n\r");
 	printf("    - Interrupt Descriptor Table: LOCKED\n\r");
 	printf(" [SECURITY] System Integrity: 100%% (No Anomalies)\n\r");
 
-	/* Simple Integer Benchmark */
+	/* 
+	 * Simple Integer Benchmark 
+	 * 간단한 정수 벤치마크
+	 */
 	printf(" [PERF] Running CPU Integer Benchmark (Single Core Stress)...\n\r"); 
 	start_bench = jiffies;
 	for(k=0; k<5000000; k++) { 
-		/* Busy loop to simulate load */
+		/* 
+		 * Busy loop to simulate load 
+		 * 부하 시뮬레이션을 위한 바쁜 대기 루프
+		 */
 		b_counter += k; 
 	}
 	printf(" [PERF] Benchmark Score: %d ticks (LOWER IS BETTER - EXCELLENT)\n\r", jiffies - start_bench); 
@@ -181,11 +202,17 @@ void init(void)
 	printf("   SYSTEM READY. UNLEASH THE POWER.\n\r");
 	printf("==================================================================\n\r");
 
-	/* Forking the first user-space shell */
+	/* 
+	 * Forking the first user-space shell 
+	 * 첫 번째 사용자 공간 셸 포크(Fork)
+	 */
 	if ((i = fork()) < 0) {
 		printf("CRITICAL ERROR: Fork failed in init! System Halted.\r\n");
 	} else if (!i) {
-		/* Child Process: Shell Exec */
+		/* 
+		 * Child Process: Shell Exec 
+		 * 자식 프로세스: 셸 실행
+		 */
 		close(0); close(1); close(2);
 		setsid();
 		(void) open("/dev/tty0", O_RDWR, 0);
@@ -194,11 +221,17 @@ void init(void)
 		_exit(execve("/bin/sh", argv, envp));
 	}
 	
-	/* Parent Process: Reaping Zombies */
+	/* 
+	 * Parent Process: Reaping Zombies 
+	 * 부모 프로세스: 좀비 프로세스 수거
+	 */
 	j = wait(&i);
 	printf(" [INFO] Child %d died with code %04x. Syncing filesystems...\n", j, i);
 	sync();
 	
-	/* Halt */
+	/* 
+	 * Halt 
+	 * 정지
+	 */
 	_exit(0);	
 }
