@@ -1,7 +1,19 @@
 /*
+ *  linux/kernel/printk.c
+ *
+ *  (C) 1991 Linus Torvalds
+ *
+ *  Modified by Rheehose (Rhee Creative) 2008-2026
+ *  수정자: Rheehose (Rhee Creative) 2008-2026
+ */
+
+/*
  * When in kernel-mode, we cannot use printf, as fs is liable to
  * point to 'interesting' things. Make a printf with fs-saving, and
  * all is well.
+ *
+ * 커널 모드에 있을 때는 printf를 사용할 수 없습니다. fs가 '흥미로운'(예기치 않은) 것을
+ * 가리킬 수 있기 때문입니다. fs를 저장하는 printf를 만들면 모든 것이 잘 해결됩니다.
  */
 #include <stdarg.h>
 #include <stddef.h>

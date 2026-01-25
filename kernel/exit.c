@@ -1,3 +1,12 @@
+/*
+ *  linux/kernel/exit.c
+ *
+ *  (C) 1991 Linus Torvalds
+ *
+ *  Modified by Rheehose (Rhee Creative) 2008-2026
+ *  수정자: Rheehose (Rhee Creative) 2008-2026
+ */
+
 #include <errno.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -10,6 +19,10 @@
 int sys_pause(void);
 int sys_close(int fd);
 
+/*
+ * release() releases the task structure and the memory pages of a task.
+ * release()는 태스크 구조체와 태스크의 메모리 페이지를 해제합니다.
+ */
 void release(struct task_struct * p)
 {
 	int i;
@@ -26,6 +39,10 @@ void release(struct task_struct * p)
 	panic("trying to release non-existent task");
 }
 
+/*
+ * send_sig() sends a signal to a process.
+ * send_sig()는 프로세스에 신호를 보냅니다.
+ */
 static inline void send_sig(long sig,struct task_struct * p,int priv)
 {
 	if (!p || sig<1 || sig>32)
@@ -38,6 +55,10 @@ static inline void send_sig(long sig,struct task_struct * p,int priv)
 		p->signal |= (1<<(sig-1));
 }
 
+/*
+ * do_kill() handles the kill syscall.
+ * do_kill()은 kill 시스템 호출을 처리합니다.
+ */
 void do_kill(long pid,long sig,int priv)
 {
 	struct task_struct **p = NR_TASKS + task;

@@ -1,8 +1,22 @@
 /*
+ *  linux/kernel/fork.c
+ *
+ *  (C) 1991 Linus Torvalds
+ *
+ *  Modified by Rheehose (Rhee Creative) 2008-2026
+ *  수정자: Rheehose (Rhee Creative) 2008-2026
+ */
+
+/*
  *  'fork.c' contains the help-routines for the 'fork' system call
  * (see also system_call.s), and some misc functions ('verify_area').
  * Fork is rather simple, once you get the hang of it, but the memory
  * management can be a bitch. See 'mm/mm.c': 'copy_page_tables()'
+ *
+ *  'fork.c'는 'fork' 시스템 호출에 대한 도움말 루틴(system_call.s 참조)과
+ *  몇 가지 기타 함수('verify_area')를 포함합니다.
+ *  Fork는 요령을 알면 꽤 간단하지만, 메모리 관리는 까다로울 수 있습니다.
+ *  'mm/mm.c': 'copy_page_tables()'를 참조하세요.
  */
 #include <errno.h>
 
@@ -60,6 +74,9 @@ int copy_mem(int nr,struct task_struct * p)
  *  Ok, this is the main fork-routine. It copies the system process
  * information (task[nr]) and sets up the necessary registers. It
  * also copies the data segment in it's entirety.
+ *
+ *  자, 이것이 메인 포크 루틴입니다. 시스템 프로세스 정보(task[nr])를 복사하고
+ *  필요한 레지스터를 설정합니다. 또한 데이터 세그먼트를 전체적으로 복사합니다.
  */
 int copy_process(int nr,long ebp,long edi,long esi,long gs,long none,
 		long ebx,long ecx,long edx,
