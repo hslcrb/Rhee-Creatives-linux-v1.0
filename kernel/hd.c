@@ -8,12 +8,26 @@
 #include <asm/segment.h>
 
 /*
+ *  linux/kernel/hd.c
+ *
+ *  (C) 1991 Linus Torvalds
+ *  
+ *  Modified by Rheehose (Rhee Creative) 2008-2026
+ *  수정자: Rheehose (Rhee Creative) 2008-2026
+ */
+
+/*
  * This code handles all hd-interrupts, and read/write requests to
  * the hard-disk. It is relatively straigthforward (not obvious maybe,
  * but interrupts never are), while still being efficient, and never
  * disabling interrupts (except to overcome possible race-condition).
  * The elevator block-seek algorithm doesn't need to disable interrupts
  * due to clever programming.
+ *
+ * 이 코드는 모든 hd 인터럽트와 하드 디스크에 대한 읽기/쓰기 요청을 처리합니다.
+ * 비교적 간단하지만(명백하지 않을 수도 있지만, 인터럽트는 결코 그렇지 않습니다),
+ * 여전히 효율적이며 인터럽트를 절대 비활성화하지 않습니다(가능한 경쟁 상태를 극복하기 위한 경우 제외).
+ * 엘리베이터 블록 탐색 알고리즘은 영리한 프로그래밍 덕분에 인터럽트를 비활성화할 필요가 없습니다.
  */
 
 /* Max read/write errors/sector */

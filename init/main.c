@@ -131,9 +131,14 @@ static char * envp[] = { "HOME=/root","PATH=/bin","PWD=/", NULL };
  *  INIT Process - "The Beginning"
  *  INIT 프로세스 - "시작"
  *  ------------------------------
- *  Modified for Rhee Creatives Extreme Linux v1.0
- *  Rhee Creatives 익스트림 리눅스 v1.0을 위해 수정됨
- *  Date: 2026/01/25
+ *  Original Author: Linus Torvalds (1991)
+ *  원작자: 리누스 토르발즈 (1991)
+ *
+ *  Modified & Optimized by: Rheehose (Rhee Creative) 2008-2026
+ *  수정 및 최적화: Rheehose (Rhee Creative) 2008-2026
+ *
+ *  Edition: Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ *  에디션: Rhee Creatives Linux v1.0 - 익스트림 퍼포먼스 에디션
  */
 void init(void)
 {
@@ -159,13 +164,14 @@ void init(void)
 	
 	/* 
 	 * ==================================================================
-	 *  EXTREME PERFORMANCE EDITION - BOOT SEQUENCE
-	 *  익스트림 퍼포먼스 에디션 - 부팅 시퀀스
+	 *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+	 *  Rhee Creatives Linux v1.0 - 익스트림 퍼포먼스 에디션
+	 *  (C) 2008-2026 Rheehose (Rhee Creative)
 	 * ==================================================================
 	 */
 	printf("\n\r");
 	printf("==================================================================\n\r");
-	printf("       RHEE CREATIVES LINUX v1.0 - EXTREME PERFORMANCE EDITION    \n\r");
+	printf("     Rhee Creatives Linux v1.0 - Extreme Performance Edition      \n\r");
 	printf("==================================================================\n\r");
 	printf(" [BOOT] System Core Initializing...\n\r");
 	

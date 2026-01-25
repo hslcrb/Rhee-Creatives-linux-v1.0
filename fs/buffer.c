@@ -1,9 +1,23 @@
 /*
+ *  linux/fs/buffer.c
+ *
+ *  (C) 1991 Linus Torvalds
+ *
+ *  Enhanced & Optimized by Rheehose (Rhee Creative) 2008-2026
+ *  향상 및 최적화: Rheehose (Rhee Creative) 2008-2026
+ */
+
+/*
  *  'buffer.c' implements the buffer-cache functions. Race-conditions have
  * been avoided by NEVER letting a interrupt change a buffer (except for the
  * data, of course), but instead letting the caller do it. NOTE! As interrupts
  * can wake up a caller, some cli-sti sequences are needed to check for
  * sleep-on-calls. These should be extremely quick, though (I hope).
+ *
+ *  'buffer.c'는 버퍼 캐시 기능을 구현합니다. 인터럽트가 버퍼를 변경하지 못하게 함으로써
+ *  (물론 데이터는 제외하고) 경쟁 상태를 피했습니다. 대신 호출자가 변경하도록 합니다.
+ *  참고! 인터럽트가 호출자를 깨울 수 있으므로, sleep-on-call을 확인하기 위해
+ *  일부 cli-sti 시퀀스가 필요합니다. 이것들은 매우 빠를 것입니다(희망컨대).
  */
 
 #include <linux/config.h>

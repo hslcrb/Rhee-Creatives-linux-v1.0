@@ -46,8 +46,20 @@ __asm__ __volatile("cld\n\t"
 static unsigned short mem_map [ PAGING_PAGES ] = {0,};
 
 /*
- * Get physical address of first (actually last :-) free page, and mark it
+ *  linux/mm/memory.c
+ *
+ *  (C) 1991 Linus Torvalds
+ *
+ *  Modified by Rheehose (Rhee Creative) 2008-2026
+ *  수정자: Rheehose (Rhee Creative) 2008-2026
+ */
+
+/*
+ *  Get physical address of first (actually last :-) free page, and mark it
  * used. If no free pages left, return 0.
+ *
+ *  첫 번째(실제로는 마지막 :-) 여유 페이지의 물리적 주소를 가져오고, 사용됨으로 표시합니다.
+ *  여유 페이지가 없으면 0을 반환합니다.
  */
 unsigned long get_free_page(void)
 {

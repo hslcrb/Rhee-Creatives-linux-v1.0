@@ -1,3 +1,12 @@
+/*
+ *  linux/kernel/sys.c
+ *
+ *  (C) 1991 Linus Torvalds
+ *
+ *  Modified by Rheehose (Rhee Creative) 2008-2026
+ *  수정자: Rheehose (Rhee Creative) 2008-2026
+ */
+
 #include <errno.h>
 
 #include <linux/sched.h>
@@ -155,6 +164,10 @@ int sys_brk(unsigned long end_data_seg)
  * This needs some heave checking ...
  * I just haven't get the stomach for it. I also don't fully
  * understand sessions/pgrp etc. Let somebody who does explain it.
+ *
+ * 이것은 무거운 검사가 필요합니다...
+ * 저는 단지 그럴 배짱이 없습니다. 또한 세션/pgrp 등을 완전히
+ * 이해하지 못합니다. 누군가 아는 사람이 설명해 주세요.
  */
 int sys_setpgid(int pid, int pgid)
 {
@@ -203,7 +216,7 @@ int sys_oldolduname(void* v)
 int sys_uname(struct utsname * name)
 {
 	static struct utsname thisname = {
-		"RHEE LINUX 1.0", "EXTREME", "1.0-MODDED", "build-20260125", "i386-turbo"
+		"Rhee Creatives Linux v1.0", "Extreme Performance", "1.0-RHEE", "20260125", "i386"
 	}; /* 20260125: Uname Branding / Uname 브랜딩 */
 	int i;
 

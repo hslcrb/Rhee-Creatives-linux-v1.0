@@ -1,6 +1,12 @@
 /*
- *  'sched.c' - The HEART of the Rhee Creatives Extreme Linux Kernel.
- *  'sched.c' - Rhee Creatives 익스트림 리눅스 커널의 심장부입니다.
+ *  'sched.c' - The HEART of the Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ *  'sched.c' - Rhee Creatives Linux v1.0 - 익스트림 퍼포먼스 에디션의 심장부
+ *
+ *  Original Author: Linus Torvalds
+ *  원작자: 리누스 토르발즈
+ *
+ *  Major Overhaul & Optimization: Rheehose (Rhee Creative) 2008-2026
+ *  대규모 정비 및 최적화: Rheehose (Rhee Creative) 2008-2026
  *
  *  This file contains the core scheduling primitives including:
  *  - sleep_on(): Puts a process to sleep safely.
@@ -26,7 +32,6 @@
  *  
  *  Optimization Level: EXTREME (Hand-tuned for i386)
  *  최적화 수준: EXTREME (i386을 위해 수동 튜닝됨)
- *  Date Modified: 2026/01/25
  */
 
 #include <linux/sched.h>
