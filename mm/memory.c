@@ -265,8 +265,8 @@ void calc_mem(void)
 
 	for(i=0 ; i<PAGING_PAGES ; i++)
 		if (!mem_map[i]) free++;
-	printk(" [MEM] Free Memory: %d KB (Available for Processes)\n\r", free*4); /* 20260119: Memory display in KB */
-	printk(" [MEM] Memory Manager Efficiency: 100% (No Leaks Detected)\n\r"); /* 20260119: Memory efficiency status */
+	printk(" [MEM] Free Memory: %d KB (Available for Processes)\n\r", free*4); /* 20260119: Memory display in KB / KB 단위 메모리 표시 */
+	printk(" [MEM] Memory Manager Efficiency: 100% (No Leaks Detected)\n\r"); /* 20260119: Memory efficiency status / 메모리 효율성 상태 */
 	for(i=2 ; i<1024 ; i++) {
 		if (1&pg_dir[i]) {
 			pg_tbl=(long *) (0xfffff000 & pg_dir[i]);

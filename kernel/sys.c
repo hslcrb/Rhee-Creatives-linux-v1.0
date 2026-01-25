@@ -204,7 +204,7 @@ int sys_uname(struct utsname * name)
 {
 	static struct utsname thisname = {
 		"RHEE LINUX 1.0", "EXTREME", "1.0-MODDED", "build-20260125", "i386-turbo"
-	}; /* 20260125: Uname Branding */
+	}; /* 20260125: Uname Branding / Uname 브랜딩 */
 	int i;
 
 	if (!name) return -1;

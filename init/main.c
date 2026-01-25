@@ -10,9 +10,17 @@
  * calls - which means inline code for fork too, as otherwise we
  * would use the stack upon exit from 'fork()'.
  *
+ * execve가 실행될 때까지 커널 공간에서의 포크(fork)는 "쓰기 시 복사(COPY ON WRITE)"가
+ * 발생하지 않으므로(!!!) 이 코드는 인라인(inline)이어야 합니다.
+ * 이는 스택을 제외하면 문제가 되지 않습니다. 이 문제는 fork() 이후 main()이
+ * 스택을 전혀 사용하지 않도록 함으로써 처리됩니다. 따라서 함수 호출이 없어야 하며,
+ * 이는 fork()에 대해서도 인라인 코드를 의미합니다. 그렇지 않으면 'fork()' 종료 시 스택을 사용하게 됩니다.
+ *
  * Actually only pause and fork are needed inline, so that there
  * won't be any messing with the stack from main(), but we define
  * some others too.
+ * 실제로 pause와 fork만 인라인으로 필요하여 main()에서 스택이 엉키지 않게 하지만,
+ * 우리는 다른 몇 가지도 정의합니다.
  */
 static inline _syscall0(int,fork)
 static inline _syscall0(int,pause)
