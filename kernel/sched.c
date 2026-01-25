@@ -206,8 +206,10 @@ int sys_getegid(void)
 
 int sys_nice(long increment)
 {
-	if (current->priority-increment>0)
+	if (current->priority-increment>0) {
 		current->priority -= increment;
+		if (increment < 0) printk(" [PERF] Process Priority Boosted! (PID: %d)\n\r", current->pid); /* 20260125: Nice boost notification */
+	}
 	return 0;
 }
 
@@ -251,4 +253,5 @@ void sched_init(void)
 	set_intr_gate(0x20,&timer_interrupt);
 	outb(inb_p(0x21)&~0x01,0x21);
 	set_system_gate(0x80,&system_call);
+	printk(" [SCHED] Rhee Extreme Scheduler: Initialized (Preemptive Multitasking Enabled)\n\r"); /* 20260125: Scheduler Status */
 }

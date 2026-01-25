@@ -203,8 +203,8 @@ int sys_oldolduname(void* v)
 int sys_uname(struct utsname * name)
 {
 	static struct utsname thisname = {
-		"linux 0.01-3.x","nodename","release ","3.x","i386"
-	};
+		"RHEE LINUX 1.0", "EXTREME", "1.0-MODDED", "build-20260125", "i386-turbo"
+	}; /* 20260125: Uname Branding */
 	int i;
 
 	if (!name) return -1;
