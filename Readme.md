@@ -59,11 +59,51 @@ docker build -t linux-0.01-build .
 docker run --rm -v $(pwd):/linux-0.01 linux-0.01-build make
 ```
 
-## 📜 License / 라이선스
+---
+
+## ❓ Troubleshooting / 문제 해결
+
+### "Permission denied" Error / "권한 거부" 오류
+If you see `qemu-system-i386: Could not open 'Image': Permission denied`, it means the `Image` file created by Docker is owned by root.
+만약 `qemu-system-i386: Could not open 'Image': Permission denied` 오류가 발생한다면, Docker가 생성한 `Image` 파일이 root 소유이기 때문입니다.
+
+**Solution / 해결 방법:**
+Run the following command to claim ownership:
+다음 명령어를 실행하여 소유권을 가져오세요:
+```bash
+sudo chown $USER:$USER Image
+```
+
+---
+
+## 🎮 Usage Scenarios / 사용 시나리오
+
+### 1. Educational Exploration / 교육적 탐구
+- **Scenario**: Studying OS scheduling algorithms.
+- **Action**: Modify `kernel/sched.c` and observe changes in the "Benchmark Score" on boot.
+- **시나리오**: 운영체제 스케줄링 알고리즘 공부.
+- **활동**: `kernel/sched.c`를 수정하고 부팅 시 "Benchmark Score"의 변화를 관찰하세요.
+
+### 2. Retro-Coding / 레트로 코딩
+- **Scenario**: Writing C code in a 1991 environment.
+- **Action**: Use `cat` to write `hello.c` inside the running QEMU instance and compile with `gcc`.
+- **시나리오**: 1991년 환경에서 C 코드 작성.
+- **활동**: 실행 중인 QEMU 인스턴스 안에서 `cat`을 사용해 `hello.c`를 작성하고 `gcc`로 컴파일해 보세요.
+
+### 3. Kernel Hacking / 커널 해킹
+- **Scenario**: Creating your own system call.
+- **Action**: Modify `kernel/sys.c` to add a custom syscall (e.g., `sys_hello`) and rebuild.
+- **시나리오**: 나만의 시스템 호출 만들기.
+- **활동**: `kernel/sys.c`를 수정하여 사용자 정의 시스템 호출(예: `sys_hello`)을 추가하고 다시 빌드하세요.
+
+---
+
+## 📜 License & Credits / 라이선스 및 크레딧
+
 This project is licensed under the **Apache License, Version 2.0**.
-See [LICENSE](LICENSE) file for details.
+See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md) for details.
 이 프로젝트는 **Apache License, Version 2.0**에 따라 라이선스가 부여됩니다.
-자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+자세한 내용은 [LICENSE](LICENSE) 및 [NOTICE.md](NOTICE.md)를 참조하세요.
 
 ### Credits / 크레딧
 - **Original Kernel (v0.01)**: Linus Torvalds (1991)
