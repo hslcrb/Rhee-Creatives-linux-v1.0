@@ -1,3 +1,10 @@
+/*
+ *  linux/fs/namei.c
+ *  (C) 1991 Linus Torvalds
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ */
+
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <asm/segment.h>
@@ -13,6 +20,8 @@
 /*
  * comment out this line if you want names > NAME_LEN chars to be
  * truncated. Else they will be disallowed.
+ * 이름이 NAME_LEN보다 길 때 잘라내고 싶으면 이 라인을 주석 처리하십시오.
+ * 그렇지 않으면 허용되지 않습니다.
  */
 /* #define NO_TRUNCATE */
 
@@ -26,12 +35,16 @@
  * is used to check for read/write/execute permissions on a file.
  * I don't know if we should look at just the euid or both euid and
  * uid, but that should be easily changed.
+ *
+ * 파일에 대한 읽기/쓰기/실행 권한을 확인하는 데 사용됩니다.
+ * euid만 볼지, euid와 uid 둘 다 볼지 모르겠지만, 쉽게 변경할 수 있습니다.
  */
 static int permission(struct m_inode * inode,int mask)
 {
 	int mode = inode->i_mode;
 
 /* special case: not even root can read/write a deleted file */
+/* 특수한 경우: 루트조차 삭제된 파일을 읽거나 쓸 수 없습니다. */
 	if (inode->i_dev && !inode->i_nlinks)
 		return 0;
 	if (!(current->uid && current->euid))
@@ -48,7 +61,12 @@ static int permission(struct m_inode * inode,int mask)
  * Thus we'll have to use match. No big problem. Match also makes
  * some sanity tests.
  *
+ * 이름이 우리 데이터 공간에 있지 않으므로 strncmp를 사용할 수 없습니다.
+ * 따라서 match 함수를 사용해야 합니다. 큰 문제는 아닙니다.
+ * match는 또한 몇 가지 무결성 검사도 수행합니다.
+ *
  * NOTE! unlike strncmp, match returns 1 for success, 0 for failure.
+ * 주의! strncmp와 달리 match는 성공 시 1, 실패 시 0을 반환합니다.
  */
 __attribute__((noinline)) int match(int len,const char * name,struct dir_entry * de)
 {
@@ -74,6 +92,10 @@ __attribute__((noinline)) int match(int len,const char * name,struct dir_entry *
  * returns the cache buffer in which the entry was found, and the entry
  * itself (as a parameter - res_dir). It does NOT read the inode of the
  * entry - you'll have to do that yourself if you want to.
+ *
+ * 지정된 디렉토리에서 원하는 이름을 가진 엔트리를 찾습니다. 엔트리가 발견된
+ * 캐시 버퍼와 엔트리 자체(매개변수 res_dir)를 반환합니다. 엔트리의 아이노드를
+ * 읽지는 않으므로, 원한다면 직접 수행해야 합니다.
  */
 static struct buffer_head * find_entry(struct m_inode * dir,
 	const char * name, int namelen, struct dir_entry ** res_dir)
@@ -128,9 +150,16 @@ static struct buffer_head * find_entry(struct m_inode * dir,
  * adds a file entry to the specified directory, using the same
  * semantics as find_entry(). It returns NULL if it failed.
  *
+ * find_entry()와 동일한 의미론을 사용하여 지정된 디렉토리에 파일 엔트리를 추가합니다.
+ * 실패 시 NULL을 반환합니다.
+ *
  * NOTE!! The inode part of 'de' is left at 0 - which means you
  * may not sleep between calling this and putting something into
  * the entry, as someone else might have used it while you slept.
+ *
+ * 주의!! 'de'의 아이노드 부분은 0으로 남겨집니다. 즉, 이것을 호출하고 엔트리에
+ * 무언가를 넣는 사이에 잠들(스케줄링 될) 수 없습니다. 당신이 잠든 사이 다른
+ * 누군가가 그것을 사용했을 수도 있기 때문입니다.
  */
 static struct buffer_head * add_entry(struct m_inode * dir,
 	const char * name, int namelen, struct dir_entry ** res_dir)
@@ -194,6 +223,9 @@ static struct buffer_head * add_entry(struct m_inode * dir,
  *
  * Getdir traverses the pathname until it hits the topmost directory.
  * It returns NULL on failure.
+ *
+ * get_dir()은 최상위 디렉토리에 도달할 때까지 경로명을 탐색합니다.
+ * 실패 시 NULL을 반환합니다.
  */
 static struct m_inode * get_dir(const char * pathname)
 {
@@ -214,7 +246,7 @@ static struct m_inode * get_dir(const char * pathname)
 	} else if (c)
 		inode = current->pwd;
 	else
-		return NULL;	/* empty name is bad */
+		return NULL;	/* empty name is bad / 빈 이름은 좋지 않음 */
 	inode->i_count++;
 	while (1) {
 		thisname = pathname;
@@ -244,6 +276,8 @@ static struct m_inode * get_dir(const char * pathname)
  *
  * dir_namei() returns the inode of the directory of the
  * specified name, and the name within that directory.
+ *
+ * dir_namei()는 지정된 이름의 디렉토리 아이노드와 그 디렉토리 내의 이름을 반환합니다.
  */
 static struct m_inode * dir_namei(const char * pathname,
 	int * namelen, const char ** name)
@@ -269,6 +303,9 @@ static struct m_inode * dir_namei(const char * pathname,
  * is used by most simple commands to get the inode of a specified name.
  * Open, link etc use their own routines, but this is enough for things
  * like 'chmod' etc.
+ *
+ * 대부분의 간단한 명령에서 지정된 이름의 아이노드를 가져오는 데 사용됩니다.
+ * Open, link 등은 자체 루틴을 사용하지만, 'chmod' 등에는 이것으로 충분합니다.
  */
 struct m_inode * namei(const char * pathname)
 {
@@ -280,7 +317,7 @@ struct m_inode * namei(const char * pathname)
 
 	if (!(dir = dir_namei(pathname,&namelen,&basename)))
 		return NULL;
-	if (!namelen)			/* special case: '/usr/' etc */
+	if (!namelen)			/* special case: '/usr/' etc / 특수한 경우: '/usr/' 등 */
 		return dir;
 	bh = find_entry(dir,basename,namelen,&de);
 	if (!bh) {
@@ -303,6 +340,7 @@ struct m_inode * namei(const char * pathname)
  *	open_namei()
  *
  * namei for open - this is in fact almost the whole open-routine.
+ * open을 위한 namei - 사실상 거의 전체 open 루틴입니다.
  */
 int open_namei(const char * pathname, int flag, int mode,
 	struct m_inode ** res_inode)
@@ -319,7 +357,7 @@ int open_namei(const char * pathname, int flag, int mode,
 	mode |= I_REGULAR;
 	if (!(dir = dir_namei(pathname,&namelen,&basename)))
 		return -ENOENT;
-	if (!namelen) {			/* special case: '/usr/' etc */
+	if (!namelen) {			/* special case: '/usr/' etc / 특수한 경우: '/usr/' 등 */
 		if (!(flag & (O_ACCMODE|O_CREAT|O_TRUNC))) {
 			*res_inode=dir;
 			return 0;
@@ -457,6 +495,7 @@ int sys_mkdir(const char * pathname, int mode)
 
 /*
  * routine to check that the specified directory is empty (for rmdir)
+ * 지정된 디렉토리가 비어 있는지 확인하는 루틴 (rmdir용)
  */
 static int empty_dir(struct m_inode * inode)
 {
