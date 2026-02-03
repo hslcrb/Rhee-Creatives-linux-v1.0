@@ -1,11 +1,19 @@
 /*
+ *  linux/fs/super.c
+ *  (C) 1991  Linus Torvalds
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ */
+
+/*
  * super.c contains code to handle the super-block tables.
+ * super.c는 슈퍼블록 테이블을 처리하는 코드를 포함합니다.
  */
 #include <linux/config.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 
-/* set_bit uses setb, as gas doesn't recognize setc */
+/* set_bit uses setb, as gas doesn't recognize setc / set_bit은 setb를 사용합니다. gas가 setc를 인식하지 못하기 때문입니다. */
 #define set_bit(bitnr,addr) ({ \
 register int __res;/* __asm__("ax");*/ \
 __asm__("bt %2,%3;setb %%al":"=a" (__res):"a" (0),"r" (bitnr),"m" (*(addr))); \
@@ -13,6 +21,10 @@ __res; })
 
 struct super_block super_block[NR_SUPER];
 
+/*
+ * do_mount: Mounts the specified device as a filesystem.
+ * do_mount: 지정된 장치를 파일 시스템으로 마운트합니다.
+ */
 struct super_block * do_mount(int dev)
 {
 	struct super_block * p;
@@ -22,7 +34,7 @@ struct super_block * do_mount(int dev)
 	for(p = &super_block[0] ; p < &super_block[NR_SUPER] ; p++ )
 		if (!(p->s_dev))
 			break;
-	p->s_dev = -1;		/* mark it in use */
+	p->s_dev = -1;		/* mark it in use / 사용 중으로 표시 */
 	if (p >= &super_block[NR_SUPER])
 		return NULL;
 	if (!(bh = bread(dev,1)))
@@ -67,6 +79,10 @@ struct super_block * do_mount(int dev)
 	return p;
 }
 
+/*
+ * mount_root: Initializes the file system and mounts the root device.
+ * mount_root: 파일 시스템을 초기화하고 루트 장치를 마운트합니다.
+ */
 void mount_root(void)
 {
 	int i,free;
@@ -83,7 +99,7 @@ void mount_root(void)
 		panic("Unable to mount root");
 	if (!(mi=iget(ROOT_DEV,1)))
 		panic("Unable to read root i-node");
-	mi->i_count += 3 ;	/* NOTE! it is logically used 4 times, not 1 */
+	mi->i_count += 3 ;	/* NOTE! it is logically used 4 times, not 1 / 주의! 논리적으로 1번이 아닌 4번 사용됨 */
 	p->s_isup = p->s_imount = mi;
 	current->pwd = mi;
 	current->root = mi;
@@ -92,11 +108,13 @@ void mount_root(void)
 	while (-- i >= 0)
 		if (!set_bit(i&8191,p->s_zmap[i>>13]->b_data))
 			free++;
-	printk("%d/%d free blocks\n\r",free,p->s_nzones);
+	printk(" [FS] Root Mounted: %d/%d blocks free\n\r",free,p->s_nzones);
+	/* [FS] 루트 마운트됨: %d/%d 블록 남음 */
 	free=0;
 	i=p->s_ninodes+1;
 	while (-- i >= 0)
 		if (!set_bit(i&8191,p->s_imap[i>>13]->b_data))
 			free++;
-	printk("%d/%d free inodes\n\r",free,p->s_ninodes);
+	printk(" [FS] Integrity Check: %d/%d inodes free\n\r",free,p->s_ninodes);
+	/* [FS] 무결성 검사: %d/%d 아이노드 남음 */
 }
