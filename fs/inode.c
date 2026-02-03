@@ -1,3 +1,10 @@
+/*
+ *  linux/fs/inode.c
+ *  (C) 1991 Linus Torvalds
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ */
+
 #include <string.h>
 
 #include <linux/sched.h>
@@ -10,6 +17,10 @@ struct m_inode inode_table[NR_INODE]={{0,},};
 static void read_inode(struct m_inode * inode);
 static void write_inode(struct m_inode * inode);
 
+/*
+ * wait_on_inode: Suspends process execution until the specified inode is unlocked.
+ * wait_on_inode: 지정된 아이노드의 잠금이 해제될 때까지 프로세스 실행을 중단합니다.
+ */
 static inline void wait_on_inode(struct m_inode * inode)
 {
 	cli();
@@ -18,6 +29,10 @@ static inline void wait_on_inode(struct m_inode * inode)
 	sti();
 }
 
+/*
+ * lock_inode: Acquires a lock on the specified inode, waiting if necessary.
+ * lock_inode: 지정된 아이노드에 대한 잠금을 획득하며, 필요한 경우 기다립니다.
+ */
 static inline void lock_inode(struct m_inode * inode)
 {
 	cli();
@@ -27,12 +42,20 @@ static inline void lock_inode(struct m_inode * inode)
 	sti();
 }
 
+/*
+ * unlock_inode: Releases the lock on the specified inode and wakes up waiting processes.
+ * unlock_inode: 지정된 아이노드의 잠금을 해제하고 대기 중인 프로세스를 깨웁니다.
+ */
 static inline void unlock_inode(struct m_inode * inode)
 {
 	inode->i_lock=0;
 	wake_up(&inode->i_wait);
 }
 
+/*
+ * sync_inodes: Synchronizes all dirty inodes in the inode table to the disk.
+ * sync_inodes: 아이노드 테이블의 모든 변경된(dirty) 아이노드를 디스크에 동기화합니다.
+ */
 void sync_inodes(void)
 {
 	int i;
@@ -46,6 +69,10 @@ void sync_inodes(void)
 	}
 }
 
+/*
+ * _bmap: Internal function to map a logical block number within a file to a physical block number.
+ * _bmap: 파일 내의 논리적 블록 번호를 물리적 블록 번호로 매핑하는 내부 함수입니다.
+ */
 static int _bmap(struct m_inode * inode,int block,int create)
 {
 	struct buffer_head * bh;
@@ -123,7 +150,11 @@ int create_block(struct m_inode * inode, int block)
 {
 	return _bmap(inode,block,1);
 }
-		
+
+/*
+ * iput: Releases an inode, decrementing its reference count and freeing it if necessary.
+ * iput: 아이노드를 해제하고 참조 횟수를 감소시키며, 필요한 경우 아이노드를 비웁니다.
+ */
 void iput(struct m_inode * inode)
 {
 	if (!inode)
@@ -162,6 +193,10 @@ repeat:
 
 static volatile int last_allocated_inode = 0;
 
+/*
+ * get_empty_inode: Finds and returns an unused inode from the inode table.
+ * get_empty_inode: 아이노드 테이블에서 사용되지 않는 아이노드를 찾아 반환합니다.
+ */
 struct m_inode * get_empty_inode(void)
 {
 	struct m_inode * inode;
@@ -199,6 +234,10 @@ struct m_inode * get_empty_inode(void)
 	return inode;
 }
 
+/*
+ * get_pipe_inode: Returns an inode set up for use as a pipe.
+ * get_pipe_inode: 파이프로 사용하도록 설정된 아이노드를 반환합니다.
+ */
 struct m_inode * get_pipe_inode(void)
 {
 	struct m_inode * inode;
@@ -209,12 +248,16 @@ struct m_inode * get_pipe_inode(void)
 		inode->i_count = 0;
 		return NULL;
 	}
-	inode->i_count = 2;	/* sum of readers/writers */
+	inode->i_count = 2;	/* sum of readers/writers / 읽기/쓰기 수의 합 */
 	PIPE_HEAD(*inode) = PIPE_TAIL(*inode) = 0;
 	inode->i_pipe = 1;
 	return inode;
 }
 
+/*
+ * iget: Retrieves an inode with the specified device and inode number.
+ * iget: 지정된 장치 및 아이노드 번호를 가진 아이노드를 검색합니다.
+ */
 struct m_inode * iget(int dev,int nr)
 {
 	struct m_inode * inode, * empty;
@@ -247,6 +290,10 @@ struct m_inode * iget(int dev,int nr)
 	return inode;
 }
 
+/*
+ * read_inode: Reads the inode data from the disk into memory.
+ * read_inode: 디스크의 아이노드 데이터를 메모리로 읽어옵니다.
+ */
 static void read_inode(struct m_inode * inode)
 {
 	struct super_block * sb;
@@ -266,6 +313,10 @@ static void read_inode(struct m_inode * inode)
 	unlock_inode(inode);
 }
 
+/*
+ * write_inode: Writes the inode data from memory back to the disk.
+ * write_inode: 메모리의 아이노드 데이터를 디스크로 다시 씁니다.
+ */
 static void write_inode(struct m_inode * inode)
 {
 	struct super_block * sb;

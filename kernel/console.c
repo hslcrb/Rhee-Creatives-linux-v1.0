@@ -6,6 +6,14 @@
  *	'void con_write(struct tty_queue * queue)'
  * Hopefully this will be a rather complete VT102 implementation.
  *
+ * 이 모듈은 콘솔 입출력 함수를 구현합니다.
+ *	'void con_init(void)'
+ *	'void con_write(struct tty_queue * queue)'
+ * 이것이 어느 정도 완벽한 VT102 구현이 되기를 바랍니다.
+ *
+ * Original Author: Linus Torvalds
+ * Modified by: Rheehose (Rhee Creative) 2008-2026
+ * Rhee Creatives Linux v1.0 - Extreme Performance Edition
  */
 
 /*
@@ -13,6 +21,11 @@
  * (to put a word in video IO), but this will work even for keyboard
  * interrupts. We know interrupts aren't enabled when getting a keyboard
  * interrupt, as we use trap-gates. Hopefully all is well.
+ *
+ * 주의!!! 비디오 IO에 단어를 넣기 위해 잠시 인터럽트를 비활성화하고 활성화하는 경우가
+ * 있지만, 이는 키보드 인터럽트에도 잘 작동할 것입니다. 트랩 게이트를 사용하므로
+ * 키보드 인터럽트를 받을 때 인터럽트가 활성화되지 않는다는 것을 알고 있습니다.
+ * 모든 것이 잘 되기를 바랍니다.
  */
 
 #include <linux/sched.h>
@@ -42,6 +55,8 @@ unsigned char attr=0x07;
 /*
  * this is what the terminal answers to a ESC-Z or csi0c
  * query (= vt100 response).
+ *
+ * 이것은 ESC-Z 또는 csi0c 쿼리에 대해 터미널이 응답하는 내용입니다(= vt100 응답).
  */
 #define RESPONSE "\033[?1;2c"
 
@@ -180,15 +195,15 @@ static void csi_J(int par)
 	long start;
 
 	switch (par) {
-		case 0:	/* erase from cursor to end of display */
+		case 0:	/* erase from cursor to end of display / 커서부터 화면 끝까지 지움 */
 			count = (scr_end-pos)>>1;
 			start = pos;
 			break;
-		case 1:	/* erase from start to cursor */
+		case 1:	/* erase from start to cursor / 시작부터 커서까지 지움 */
 			count = (pos-origin)>>1;
 			start = origin;
 			break;
-		case 2: /* erase whole display */
+		case 2: /* erase whole display / 전체 화면 지움 */
 			count = columns*lines;
 			start = origin;
 			break;
@@ -210,17 +225,17 @@ static void csi_K(int par)
 	long start;
 
 	switch (par) {
-		case 0:	/* erase from cursor to end of line */
+		case 0:	/* erase from cursor to end of line / 커서부터 줄 끝까지 지움 */
 			if (x>=columns)
 				return;
 			count = columns-x;
 			start = pos;
 			break;
-		case 1:	/* erase from start of line to cursor */
+		case 1:	/* erase from start of line to cursor / 줄 시작부터 커서까지 지움 */
 			start = pos - (x<<1);
 			count = (x<columns)?x:columns;
 			break;
-		case 2: /* erase whole line */
+		case 2: /* erase whole line / 전체 줄 지움 */
 			start = pos - (x<<1);
 			count = columns;
 			break;
@@ -551,6 +566,9 @@ void con_write(struct tty_struct * tty)
  * This routine initalizes console interrupts, and does nothing
  * else. If you want the screen to clear, call tty_write with
  * the appropriate escape-sequece.
+ *
+ * 이 루틴은 콘솔 인터럽트를 초기화하며 다른 작업은 수행하지 않습니다.
+ * 화면을 지우려면 적절한 이스케이프 시퀀스와 함께 tty_write를 호출하십시오.
  */
 void con_init(void)
 {
@@ -562,4 +580,7 @@ void con_init(void)
 	a=inb_p(0x61);
 	outb_p(a|0x80,0x61);
 	outb(a,0x61);
+
+	printk(" [OK] Console: VT102 Ready (80x25 Text Mode Active)\n\r");
+	/* 20260121: Console initialization message / 콘솔 초기화 메시지 */
 }

@@ -3,6 +3,14 @@
  * state in 'asm.s'. Currently mostly a debugging-aid, will be extended
  * to mainly kill the offending process (probably by giving it a signal,
  * but possibly by killing it outright if necessary).
+ *
+ * 'Traps.c'는 'asm.s'에 일부 상태를 저장한 후 하드웨어 트랩 및 결함을 처리합니다.
+ * 현재는 주로 디버깅 보조 도구이며, 나중에 위반한 프로세스를 종료시키는 기능으로
+ * 확장될 것입니다(아마도 신호를 주거나 필요한 경우 즉시 종료시키는 방식).
+ *
+ * Original Author: Linus Torvalds
+ * Modified by: Rheehose (Rhee Creative) 2008-2026
+ * Rhee Creatives Linux v1.0 - Extreme Performance Edition
  */
 #include <string.h>
 
@@ -56,7 +64,8 @@ static void die(char * str,long esp_ptr,long nr)
 	long * esp = (long *) esp_ptr;
 	int i;
 
-	printk("%s: %04x\n\r",str,nr&0xffff);
+	printk(" [TRAP] System Halted: %s (%04x)\n\r",str,nr&0xffff);
+	/* [TRAP] 시스템 중단: %s (%04x) */
 	printk("EIP:\t%04x:%p\nEFLAGS:\t%p\nESP:\t%04x:%p\n",
 		esp[1],esp[0],esp[2],esp[4],esp[3]);
 	printk("fs: %04x\n",_fs());
@@ -72,7 +81,7 @@ static void die(char * str,long esp_ptr,long nr)
 	for(i=0;i<10;i++)
 		printk("%02x ",0xff & get_seg_byte(esp[1],(i+(char *)esp[0])));
 	printk("\n\r");
-	do_exit(11);		/* play segment exception */
+	do_exit(11);		/* play segment exception / 세그먼트 예외 발생 */
 }
 
 void do_double_fault(long esp, long error_code)
@@ -174,7 +183,7 @@ void trap_init(void)
 	set_trap_gate(0,&divide_error);
 	set_trap_gate(1,&debug);
 	set_trap_gate(2,&nmi);
-	set_system_gate(3,&int3);	/* int3-5 can be called from all */
+	set_system_gate(3,&int3);	/* int3-5 can be called from all / int3-5는 모두 호출 가능 */
 	set_system_gate(4,&overflow);
 	set_system_gate(5,&bounds);
 	set_trap_gate(6,&invalid_op);
@@ -190,10 +199,4 @@ void trap_init(void)
 	set_trap_gate(16,&coprocessor_error);
 	for (i=17;i<32;i++)
 		set_trap_gate(i,&reserved);
-/*	__asm__("movl $0x3ff000,%%eax\n\t"
-		"movl %%eax,%%db0\n\t"
-		"movl $0x000d0303,%%eax\n\t"
-		"movl %%eax,%%db7"
-		:::"ax");*/
 }
-

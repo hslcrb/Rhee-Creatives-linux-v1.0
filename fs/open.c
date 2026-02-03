@@ -1,3 +1,10 @@
+/*
+ *  linux/fs/open.c
+ *  (C) 1991 Linus Torvalds
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ */
+
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -120,6 +127,10 @@ int sys_chown(const char * filename,int uid,int gid)
 	return 0;
 }
 
+/*
+ * sys_open: Opens a file and returns a file descriptor.
+ * sys_open: 파일을 열고 파일 디스크립터를 반환합니다.
+ */
 int sys_open(const char * filename,int flag,int mode)
 {
 	struct m_inode * inode;
@@ -145,6 +156,7 @@ int sys_open(const char * filename,int flag,int mode)
 		return i;
 	}
 /* ttys are somewhat special (ttyxx major==4, tty major==5) */
+/* tty는 다소 특수합니다 (ttyxx 메이저==4, tty 메이저==5) */
 	if (S_ISCHR(inode->i_mode)) {
 		if (MAJOR(inode->i_zone[0])==4) {
 			if (current->leader && current->tty<0) {
@@ -172,6 +184,10 @@ int sys_creat(const char * pathname, int mode)
 	return sys_open(pathname, O_CREAT | O_TRUNC, mode);
 }
 
+/*
+ * sys_close: Closes the specified file descriptor.
+ * sys_close: 지정된 파일 디스크립터를 닫습니다.
+ */
 int sys_close(unsigned int fd)
 {	
 	struct file * filp;
