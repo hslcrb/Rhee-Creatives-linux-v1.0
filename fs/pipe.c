@@ -1,16 +1,27 @@
+/*
+ *  linux/fs/pipe.c
+ *  (C) 1991 Linus Torvalds
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ */
+
 #include <signal.h>
 
 #include <linux/sched.h>
 #include <linux/mm.h>	/* for get_free_page */
 #include <asm/segment.h>
 
+/*
+ * read_pipe: Reads data from a pipe.
+ * read_pipe: 파이프에서 데이터를 읽어옵니다.
+ */
 int read_pipe(struct m_inode * inode, char * buf, int count)
 {
 	char * b=buf;
 
 	while (PIPE_EMPTY(*inode)) {
 		wake_up(&inode->i_wait);
-		if (inode->i_count != 2) /* are there any writers left? */
+		if (inode->i_count != 2) /* are there any writers left? / 남은 쓰기 프로세스가 있는가? */
 			return 0;
 		sleep_on(&inode->i_wait);
 	}
@@ -22,13 +33,17 @@ int read_pipe(struct m_inode * inode, char * buf, int count)
 	wake_up(&inode->i_wait);
 	return b-buf;
 }
-	
+
+/*
+ * write_pipe: Writes data to a pipe.
+ * write_pipe: 파이프에 데이터를 씁니다.
+ */
 int write_pipe(struct m_inode * inode, char * buf, int count)
 {
 	char * b=buf;
 
 	wake_up(&inode->i_wait);
-	if (inode->i_count != 2) { /* no readers */
+	if (inode->i_count != 2) { /* no readers / 읽기 프로세스 없음 */
 		current->signal |= (1<<(SIGPIPE-1));
 		return -1;
 	}
@@ -49,6 +64,10 @@ int write_pipe(struct m_inode * inode, char * buf, int count)
 	return b-buf;
 }
 
+/*
+ * sys_pipe: Creates a pipe and returns two file descriptors.
+ * sys_pipe: 파이프를 생성하고 두 개의 파일 디스크립터를 반환합니다.
+ */
 int sys_pipe(unsigned long * fildes)
 {
 	struct m_inode * inode;
@@ -84,8 +103,12 @@ int sys_pipe(unsigned long * fildes)
 	}
 	f[0]->f_inode = f[1]->f_inode = inode;
 	f[0]->f_pos = f[1]->f_pos = 0;
-	f[0]->f_mode = 1;		/* read */
-	f[1]->f_mode = 2;		/* write */
+	f[0]->f_mode = 1;		/* read / 읽기 전용 */
+	f[1]->f_mode = 2;		/* write / 쓰기 전용 */
+
+	// printk(" [IPC] Pipe Channel Created (Inode: %d)\n\r", inode->i_num);
+	// 20260121: Status check for IPC / IPC 상태 확인
+
 	put_fs_long(fd[0],0+fildes);
 	put_fs_long(fd[1],1+fildes);
 	return 0;
