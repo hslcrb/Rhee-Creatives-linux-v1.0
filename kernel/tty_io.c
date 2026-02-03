@@ -2,6 +2,13 @@
  * 'tty_io.c' gives an orthogonal feeling to tty's, be they consoles
  * or rs-channels. It also implements echoing, cooked mode etc (well,
  * not currently, but ...)
+ *
+ * 'tty_io.c'는 콘솔이든 RS 채널이든 TTY에 직교적인 느낌을 줍니다.
+ * 또한 에코(echoing), 쿡드 모드(cooked mode) 등을 구현합니다.
+ *
+ * Original Author: Linus Torvalds
+ * Modified by: Rheehose (Rhee Creative) 2008-2026
+ * Rhee Creatives Linux v1.0 - Extreme Performance Edition
  */
 #include <ctype.h>
 #include <errno.h>
@@ -40,20 +47,20 @@
 struct tty_struct tty_table[] = {
 	{
 		{0,
-		OPOST|ONLCR,	/* change outgoing NL to CRNL */
+		OPOST|ONLCR,	/* change outgoing NL to CRNL / 나가는 NL을 CRNL로 변경 */
 		0,
 		ICANON | ECHO | ECHOCTL | ECHOKE,
-		0,		/* console termio */
+		0,		/* console termio / 콘솔 termio */
 		INIT_C_CC},
-		0,			/* initial pgrp */
-		0,			/* initial stopped */
+		0,			/* initial pgrp / 초기 pgrp */
+		0,			/* initial stopped / 초기 정지 상태 */
 		con_write,
-		{0,0,0,0,""},		/* console read-queue */
-		{0,0,0,0,""},		/* console write-queue */
-		{0,0,0,0,""}		/* console secondary queue */
+		{0,0,0,0,""},		/* console read-queue / 콘솔 읽기 큐 */
+		{0,0,0,0,""},		/* console write-queue / 콘솔 쓰기 큐 */
+		{0,0,0,0,""}		/* console secondary queue / 콘솔 보조 큐 */
 	},{
 		{0, /*IGNCR*/
-		OPOST | ONLRET,		/* change outgoing NL to CR */
+		OPOST | ONLRET,		/* change outgoing NL to CR / 나가는 NL을 CR로 변경 */
 		B2400 | CS8,
 		0,
 		0,
@@ -66,7 +73,7 @@ struct tty_struct tty_table[] = {
 		{0,0,0,0,""}
 	},{
 		{0, /*IGNCR*/
-		OPOST | ONLRET,		/* change outgoing NL to CR */
+		OPOST | ONLRET,		/* change outgoing NL to CR / 나가는 NL을 CR로 변경 */
 		B2400 | CS8,
 		0,
 		0,
@@ -84,6 +91,9 @@ struct tty_struct tty_table[] = {
  * these are the tables used by the machine code handlers.
  * you can implement pseudo-tty's or something by changing
  * them. Currently not done.
+ * 
+ * 이들은 머신 코드 핸들러에서 사용되는 테이블입니다.
+ * 이들을 변경하여 의사 TTY 등을 구현할 수 있습니다. 현재는 되어 있지 않습니다.
  */
 struct tty_queue * table_list[]={
 	&tty_table[0].read_q, &tty_table[0].write_q,
@@ -95,6 +105,8 @@ void tty_init(void)
 {
 	rs_init();
 	con_init();
+	// printk(" [OK] TTY System: Serial & Console Initialized\n\r");
+	// 20260121: TTY initialization status / TTY 초기화 상태
 }
 
 void tty_intr(struct tty_struct * tty, int signal)
@@ -126,6 +138,10 @@ static void sleep_if_full(struct tty_queue * queue)
 	sti();
 }
 
+/*
+ * copy_to_cooked: Copies characters from the raw read queue to the cooked secondary queue.
+ * copy_to_cooked: raw 읽기 큐에서 가공된(cooked) 보조 큐로 문자를 복사합니다.
+ */
 void copy_to_cooked(struct tty_struct * tty)
 {
 	signed char c;
@@ -292,14 +308,8 @@ int tty_write(unsigned channel, char * buf, int nr)
 }
 
 /*
- * Jeh, sometimes I really like the 386.
- * This routine is called from an interrupt,
- * and there should be absolutely no problem
- * with sleeping even in an interrupt (I hope).
- * Of course, if somebody proves me wrong, I'll
- * hate intel for all time :-). We'll have to
- * be careful and see to reinstating the interrupt
- * chips before calling this, though.
+ * do_tty_interrupt: Main entry point for TTY interrupts.
+ * do_tty_interrupt: TTY 인터럽트의 주 진입점입니다.
  */
 void do_tty_interrupt(int tty)
 {
