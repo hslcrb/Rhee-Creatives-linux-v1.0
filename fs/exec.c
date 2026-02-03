@@ -1,12 +1,11 @@
-
 /*
  *  linux/fs/exec.c
  *
  *  (C) 1991  Linus Torvalds
  *  (C) 2007  Abdel Benamrouche : use elf binary instead of a.out
- * 
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
  */
-
 
 #include <errno.h>
 #include <sys/stat.h>
@@ -25,6 +24,9 @@ extern int sys_close(int fd);
  * MAX_ARG_PAGES defines the number of pages allocated for arguments
  * and envelope for the new program. 32 should suffice, this gives
  * a maximum env+arg of 128kB !
+ *
+ * MAX_ARG_PAGES는 새 프로그램을 위한 인자 및 환경 변수에 할당된 페이지 수를 정의합니다.
+ * 32개면 충분하며, 이는 최대 128kB의 env+arg를 제공합니다!
  */
 #define MAX_ARG_PAGES 32
 
@@ -56,6 +58,10 @@ typedef struct
  * create_tables() parses the env- and arg-strings in new user
  * memory and creates the pointer tables from them, and puts their
  * addresses on the "stack", returning the new stack pointer value.
+ *
+ * create_tables()는 새 사용자 메모리에서 환경 변수 및 인자 문자열을 파싱하고
+ * 이들로부터 포인터 테이블을 생성하며, 그 주소를 "스택"에 넣고
+ * 새 스택 포인터 값을 반환합니다.
  */
 static unsigned long * create_tables(char * p,int argc,int envc)
 {
@@ -85,6 +91,7 @@ static unsigned long * create_tables(char * p,int argc,int envc)
 
 /*
  * count() counts the number of arguments/envelopes
+ * count()는 인자/환경 변수의 개수를 셉니다.
  */
 static int count(char ** argv)
 {
@@ -102,6 +109,10 @@ static int count(char ** argv)
  * 'copy_string()' copies argument/envelope strings from user
  * memory to free pages in kernel mem. These are in a format ready
  * to be put directly into the top of new user memory.
+ *
+ * 'copy_string()'은 사용자 메모리에서 커널 메모리의 빈 페이지로 인자/환경 변수
+ * 문자열을 복사합니다. 이들은 새 사용자 메모리의 상단에 직접 넣을 수 있는
+ * 준비된 형식입니다.
  */
 static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,
 		unsigned long p)
@@ -112,11 +123,11 @@ static unsigned long copy_strings(int argc,char ** argv,unsigned long *page,
 	while (argc-- > 0) {
 		if (!(tmp = (char *)get_fs_long(((unsigned long *) argv)+argc)))
 			panic("argc is wrong");
-		len=0;		/* remember zero-padding */
+		len=0;		/* remember zero-padding / 제로 패딩 기억 */
 		do {
 			len++;
 		} while (get_fs_byte(tmp++));
-		if (p-len < 0)		/* this shouldn't happen - 128kB */
+		if (p-len < 0)		/* this shouldn't happen - 128kB / 이런 일은 없어야 함 - 128kB */
 			return 0;
 		i = ((unsigned) (p-len)) >> 12;
 		while (i<MAX_ARG_PAGES && !page[i]) {
@@ -150,6 +161,7 @@ static unsigned long change_ldt(unsigned long text_size,unsigned long * page)
 	set_base(current->ldt[2],data_base);
 	set_limit(current->ldt[2],data_limit);
 /* make sure fs points to the NEW data segment */
+/* fs가 새로운 데이터 세그먼트를 가리키도록 확인 */
 	__asm__("pushl $0x17\n\tpop %%fs"::);
 	data_base += data_limit;
 	for (i=MAX_ARG_PAGES-1 ; i>=0 ; i--) {
@@ -162,17 +174,20 @@ static unsigned long change_ldt(unsigned long text_size,unsigned long * page)
 
 /*
  * return 1 if ex if a valid elf executable
- * */
+ * ex가 유효한 elf 실행 파일이면 1을 반환
+ */
 int is_valid_elf(Elf32_Ehdr* ex)
 {
 	if (ex->e_ident[EI_MAG0]!=ELFMAG0 || ex->e_ident[EI_MAG1]!=ELFMAG1 ||
 		ex->e_ident[EI_MAG2]!=ELFMAG2 || ex->e_ident[EI_MAG3]!=ELFMAG3){
-		printk("not elf format\n");
+		printk(" [ELF] Not ELF Format (Magic Mismatch)\n\r");
+		/* [ELF] ELF 형식이 아님 (매직 미스매치) */
 		return 0;	/*not elf format */
 	}
 
 	if (ex->e_type != ET_EXEC || ex->e_machine != EM_386){
-		printk("bad elf binary\n");
+		printk(" [ELF] Bad ELF Binary (Type/Machine Error)\n\r");
+		/* [ELF] 잘못된 ELF 바이너리 (타입/머신 오류) */
 		return 0;
 	}
 
@@ -182,7 +197,7 @@ int is_valid_elf(Elf32_Ehdr* ex)
 /*
  * bread(dev,ind) is an array of block index
  * So we have to get from this array our wanted index ( variable block)
- * */
+ */
 struct buffer_head* read_file_block_ind(int dev,int ind,int block_num)
 {
 	struct buffer_head * bh=NULL,*ih;
@@ -190,14 +205,16 @@ struct buffer_head* read_file_block_ind(int dev,int ind,int block_num)
 
 	if (!(ih=bread(dev,ind)))
 	{
-		printk("bad block tab\n");
+		printk(" [FS] Bad Block Table\n\r");
+		/* [FS] 잘못된 블록 테이블 */
 		return NULL;
 	}
 
 	if ((block = *((unsigned short *) (ih->b_data) + block_num))){
 		if (!(bh=bread(dev,block))) {
 			brelse(ih);
-			printk("bad block file\n");
+			printk(" [FS] Bad Block File\n\r");
+			/* [FS] 잘못된 블록 파일 */
 			return NULL;
 		}
 	}
@@ -210,6 +227,8 @@ struct buffer_head* read_file_block_ind(int dev,int ind,int block_num)
 /*
  * if block_num=5, read file at position 5*1024.
  * this work only for minix 1 fs 
+ * block_num=5이면 파일의 5*1024 위치를 읽습니다.
+ * 이 기능은 minix 1 fs에서만 작동합니다.
  */
 struct buffer_head* read_file_block(struct m_inode * inode,int block_num)
 {
@@ -217,7 +236,7 @@ struct buffer_head* read_file_block(struct m_inode * inode,int block_num)
 	int i;
 	unsigned short table;
 
-	 /* 7 1st block can be read directly */
+	 /* 7 1st block can be read directly / 처음 7개 블록은 직접 읽을 수 있음 */
 	if (block_num<=6)
 	{
 		return bread(inode->i_dev,inode->i_zone[block_num]);
@@ -228,6 +247,7 @@ struct buffer_head* read_file_block(struct m_inode * inode,int block_num)
 	if (block_num<512)
 	{
 		/* read block at i_zone[7] is an array of block index */
+		/* i_zone[7]에서 읽은 블록은 블록 인덱스의 배열임 */
 		return read_file_block_ind(inode->i_dev,inode->i_zone[7],block_num);
 	}
 
@@ -239,7 +259,7 @@ struct buffer_head* read_file_block(struct m_inode * inode,int block_num)
 		return NULL;	//just to avoid warning compilation
 	}
 
-	/* i_zone[8] => array of array block index */
+	/* i_zone[8] => array of array block index / i_zone[8] => 블록 인덱스 배열의 배열 */
 	if (!(i=inode->i_zone[8]))
 		return NULL;
 	if (!(dind = bread(inode->i_dev,i)))
@@ -256,6 +276,7 @@ struct buffer_head* read_file_block(struct m_inode * inode,int block_num)
 
 /*  
  *  read an area into %fs:mem.
+ *  영역을 %fs:mem으로 읽어옵니다.
  */
 int copy_section(struct m_inode * inode,Elf32_Off from, Elf32_Addr dest,Elf32_Word size)
 {
@@ -264,7 +285,7 @@ int copy_section(struct m_inode * inode,Elf32_Off from, Elf32_Addr dest,Elf32_Wo
 	int block_offset;			//only for 1st block
 	int cp_size;				
 
-	//read fist block
+	//read fist block / 첫 번째 블록 읽기
 	block_offset=from%BLOCK_SIZE;
 	bh=read_file_block(inode,block_num);
 	if (!bh) return -1;
@@ -276,7 +297,7 @@ int copy_section(struct m_inode * inode,Elf32_Off from, Elf32_Addr dest,Elf32_Wo
 	size-=cp_size;
 	block_num++;
 
-	//read others blocks
+	//read others blocks / 다른 블록 읽기
 	while(size)
 	{
 		bh=read_file_block(inode,block_num);
@@ -304,6 +325,11 @@ inline int create_bss_section(Elf32_Addr dest,Elf32_Word size)
  * Today it's hard to compile some programs (like bach) in a.out format
  * So this version of linux 0.01 support elf binary.
  * nb : there is no support of shared library !
+ * 
+ * linux 0.01에서는 a.out 바이너리 형식만 지원되었습니다.
+ * 오늘날 (bash 같은) 일부 프로그램을 a.out 형식으로 컴파일하기는 어렵습니다.
+ * 그래서 이 버전의 linux 0.01은 elf 바이너리를 지원합니다.
+ * 참고: 공유 라이브러리는 지원하지 않습니다!
  */
 int load_elf_binary(struct m_inode *inode, struct buffer_head* bh,
 					 bin_section* bs)
@@ -314,9 +340,9 @@ int load_elf_binary(struct m_inode *inode, struct buffer_head* bh,
 	int lb=0;
 	struct buffer_head* bht=NULL;
 
-	ex = *((Elf32_Ehdr *) bh->b_data);	/* read exec-header */
+	ex = *((Elf32_Ehdr *) bh->b_data);	/* read exec-header / 실행 헤더 읽기 */
 
-	/* check header */
+	/* check header / 헤더 확인 */
 	if (!is_valid_elf(&ex)) {
 		return -1;
 	}
@@ -326,13 +352,14 @@ int load_elf_binary(struct m_inode *inode, struct buffer_head* bh,
 	bs->b_size=ex.e_ehsize+nsect*ex.e_shentsize;
 	
 	if (nsect<=1){
-		printk("bad nb of sections %d\n",nsect);
+		printk(" [ELF] Bad Nb of Sections: %d\n\r",nsect);
+		/* [ELF] 잘못된 섹션 수: %d */
 		return -1;
 	}
 	
 	while(nsect--){
 	
-		/* load block where is our table section*/
+		/* load block where is our table section / 테이블 섹션이 있는 블록 로드 */
 		if ((ex.e_shoff + nsect * ex.e_shentsize)/BLOCK_SIZE != lb)
 		{
 			printk("");	// gcc  bug : removing this line = gcc not happy !!!
@@ -342,7 +369,7 @@ int load_elf_binary(struct m_inode *inode, struct buffer_head* bh,
 			if (!bht) return -1;
 		}
 
-		/* copy this section fo %fs:mem */
+		/* copy this section fo %fs:mem / 이 섹션을 %fs:mem으로 복사 */
 		sect=*((Elf32_Shdr *)(bht->b_data + (ex.e_shoff + 
 				nsect * ex.e_shentsize)%BLOCK_SIZE ));
 	
@@ -367,7 +394,7 @@ int load_elf_binary(struct m_inode *inode, struct buffer_head* bh,
 			continue;	  
 		}
 
-		/* find binary size */
+		/* find binary size / 바이너리 크기 찾기 */
 		if (bs->b_size<sect.sh_addr + sect.sh_size)
 			bs->b_size=sect.sh_addr + sect.sh_size;	
 	};
@@ -378,6 +405,7 @@ int load_elf_binary(struct m_inode *inode, struct buffer_head* bh,
 
 /*
  * 'do_execve()' executes a new program.
+ * 'do_execve()'는 새 프로그램을 실행합니다.
  */
 int do_execve(unsigned long * eip,long tmp,char * filename,
 	char ** argv, char ** envp)
@@ -391,11 +419,11 @@ int do_execve(unsigned long * eip,long tmp,char * filename,
 
 	if ((0xffff & eip[1]) != 0x000f)
 		panic("execve called from supervisor mode");
-	for (i=0 ; i<MAX_ARG_PAGES ; i++)	/* clear page-table */
+	for (i=0 ; i<MAX_ARG_PAGES ; i++)	/* clear page-table / 페이지 테이블 클리어 */
 		page[i]=0;
-	if (!(inode=namei(filename)))		/* get executables inode */
+	if (!(inode=namei(filename)))		/* get executables inode / 실행 파일의 아이노드 가져오기 */
 		return -ENOENT;
-	if (!S_ISREG(inode->i_mode)) {		/* must be regular file */
+	if (!S_ISREG(inode->i_mode)) {		/* must be regular file / 일반 파일이어야 함 */
 		iput(inode);
 		return -EACCES;
 	}
@@ -418,6 +446,10 @@ int do_execve(unsigned long * eip,long tmp,char * filename,
 
 	argc = count(argv);
 	envc = count(envp);
+
+	printk(" [EXEC] Loading: %s (Args: %d, Envs: %d)\n\r", filename, argc, envc);
+	/* [EXEC] 로딩 중: %s (인자: %d, 환경변수: %d) */
+
 	p = copy_strings(envc,envp,page,PAGE_SIZE*MAX_ARG_PAGES);
 	p = copy_strings(argc,argv,page,p);
 	if (!p) {
@@ -426,7 +458,7 @@ int do_execve(unsigned long * eip,long tmp,char * filename,
 		iput(inode);
 		return -1;
 	}
-/* OK, This is the point of no return */
+/* OK, This is the point of no return / 자, 이제 되돌릴 수 없는 지점입니다 */
 	for (i=0 ; i<32 ; i++)
 		current->sig_fn[i] = NULL;
 	for (i=0 ; i<NR_OPEN ; i++)
@@ -459,8 +491,8 @@ int do_execve(unsigned long * eip,long tmp,char * filename,
 	while (i&0xfff)
 		put_fs_byte(0,(char *) (i++));
 	
-	eip[0] = bs.b_entry;		/* eip, magic happens :-) */
-	eip[3] = p;					/* stack pointer */
+	eip[0] = bs.b_entry;		/* eip, magic happens :-) / eip, 마법이 일어납니다 :-) */
+	eip[3] = p;					/* stack pointer / 스택 포인터 */
 
 	return 0;
 }
