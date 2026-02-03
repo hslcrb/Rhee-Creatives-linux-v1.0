@@ -1,7 +1,9 @@
 #
-# Makefile for linux.
-# If you don't have '-mstring-insns' in your gcc (and nobody but me has :-)
-# remove them from the CFLAGS defines.
+# Makefile for Rhee Creatives Linux v1.0 - Extreme Performance Edition
+# Rhee Creatives Linux v1.0 - 익스트림 퍼포먼스 에디션을 위한 Makefile
+#
+# Original Author: Linus Torvalds
+# Modified by: Rheehose (Rhee Creative) 2008-2026
 #
 
 AS86	=as86 -0 
@@ -30,18 +32,18 @@ LIBS	=lib/lib.a
 
 all:	Image
 
+# Build the kernel Image / 커널 이미지 빌드
 Image: boot/boot tools/system tools/build
 	objcopy  -O binary -R .note -R .comment tools/system tools/system.bin
 	tools/build boot/boot tools/system.bin > Image
-#	sync
 
 tools/build: tools/build.c
 	$(CC) $(CFLAGS) \
 	-o tools/build tools/build.c
-	#chmem +65000 tools/build
 
 boot/head.o: boot/head.s
 
+# Link the system / 시스템 링크
 tools/system:	boot/head.o init/main.o \
 		$(ARCHIVES) $(LIBS)
 	$(LD) $(LDFLAGS) boot/head.o init/main.o \
@@ -61,6 +63,7 @@ fs/fs.o:
 lib/lib.a:
 	(cd lib; make)
 
+# Build the bootloader / 부트로더 빌드
 boot/boot:	boot/boot.s tools/system
 	(echo -n "SYSSIZE = (";stat -c%s tools/system \
 		| tr '\012' ' '; echo "+ 15 ) / 16") > tmp.s	
@@ -69,6 +72,7 @@ boot/boot:	boot/boot.s tools/system
 	rm -f tmp.s
 	$(LD86) -s -o boot/boot boot/boot.o
 	
+# Run in QEMU / QEMU에서 실행
 run:
 	qemu-system-i386 -drive format=raw,file=Image,index=0,if=floppy -boot a -hdb hd_oldlinux.img -m 8 -machine pc-i440fx-2.5
 
@@ -78,6 +82,7 @@ run-curses:
 dump:
 	objdump -D --disassembler-options=intel tools/system > System.dum
 
+# Clean build artifacts / 빌드 산출물 삭제
 clean:
 	rm -f Image System.map tmp_make boot/boot core
 	rm -f init/*.o boot/*.o tools/system tools/build tools/system.bin
@@ -88,8 +93,8 @@ clean:
 
 backup: clean
 	(cd .. ; tar cf - linux | compress16 - > backup.Z)
-#	sync
 
+# Generate dependencies / 의존성 생성
 dep:
 	sed '/\#\#\# Dependencies/q' < Makefile > tmp_make
 	(for i in init/*.c;do echo -n "init/";$(CPP) -M $$i;done) >> tmp_make
@@ -105,4 +110,3 @@ init/main.o : init/main.c include/unistd.h include/sys/stat.h \
   include/linux/sched.h include/linux/head.h include/linux/fs.h \
   include/linux/mm.h include/asm/system.h include/asm/io.h include/stddef.h \
   include/stdarg.h include/fcntl.h 
-
