@@ -1,3 +1,10 @@
+/*
+ *  linux/fs/read_write.c
+ *  (C) 1991 Linus Torvalds
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ */
+
 #include <sys/stat.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -16,6 +23,10 @@ extern int file_read(struct m_inode * inode, struct file * filp,
 extern int file_write(struct m_inode * inode, struct file * filp,
 		char * buf, int count);
 
+/*
+ * sys_lseek: Repositions the file offset of the open file description.
+ * sys_lseek: 열린 파일 설명의 파일 오프셋 위치를 재조정합니다.
+ */
 int sys_lseek(unsigned int fd,off_t offset, int origin)
 {
 	struct file * file;
@@ -46,6 +57,10 @@ int sys_lseek(unsigned int fd,off_t offset, int origin)
 	return file->f_pos;
 }
 
+/*
+ * sys_read: Attempts to read up to 'count' bytes from file descriptor 'fd' into the buffer 'buf'.
+ * sys_read: 파일 디스크립터 'fd'에서 최대 'count' 바이트를 버퍼 'buf'로 읽어오려고 시도합니다.
+ */
 int sys_read(unsigned int fd,char * buf,int count)
 {
 	struct file * file;
@@ -70,10 +85,15 @@ int sys_read(unsigned int fd,char * buf,int count)
 			return 0;
 		return file_read(inode,file,buf,count);
 	}
-	printk("(Read)inode->i_mode=%06o\n\r",inode->i_mode);
+	printk(" [FS] Error: Unsupported read mode (inode->i_mode=%06o)\n\r",inode->i_mode);
+	/* [FS] 오류: 지원되지 않는 읽기 모드 */
 	return -EINVAL;
 }
 
+/*
+ * sys_write: Writes up to 'count' bytes from the buffer 'buf' to the file referred to by the file descriptor 'fd'.
+ * sys_write: 버퍼 'buf'에서 최대 'count' 바이트를 파일 디스크립터 'fd'가 가리키는 파일에 씁니다.
+ */
 int sys_write(unsigned int fd,char * buf,int count)
 {
 	struct file * file;
@@ -92,6 +112,7 @@ int sys_write(unsigned int fd,char * buf,int count)
 		return block_write(inode->i_zone[0],&file->f_pos,buf,count);
 	if (S_ISREG(inode->i_mode))
 		return file_write(inode,file,buf,count);
-	printk("(Write)inode->i_mode=%06o\n\r",inode->i_mode);
+	printk(" [FS] Error: Unsupported write mode (inode->i_mode=%06o)\n\r",inode->i_mode);
+	/* [FS] 오류: 지원되지 않는 쓰기 모드 */
 	return -EINVAL;
 }
