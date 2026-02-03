@@ -1,4 +1,13 @@
+/*
+ *  fs/bitmap.c
+ *  (C) 1991 Linus Torvalds
+ *  Enhanced & Documented by Rheehose (Rhee Creative) 2008-2026
+ *  Rhee Creatives Linux v1.0 - Extreme Performance Edition
+ */
+
 /* bitmap.c contains the code that handles the inode and block bitmaps */
+/* bitmap.c는 아이노드 및 블록 비트맵을 처리하는 코드를 포함합니다. */
+
 #include <string.h>
 
 #include <linux/sched.h>
@@ -36,6 +45,10 @@ __asm__("cld\n" \
 	:"=c" (__res):"c" (0),"S" (addr):"ax","dx"/*,"si"*/); \
 __res;})
 
+/*
+ * free_block: Marks a physical disk block as free in the zone bitmap.
+ * free_block: 존(zone) 비트맵에서 물리적 디스크 블록을 빈 상태로 표시합니다.
+ */
 void free_block(int dev, int block)
 {
 	struct super_block * sb;
@@ -48,7 +61,7 @@ void free_block(int dev, int block)
 	bh = get_hash_table(dev,block);
 	if (bh) {
 		if (bh->b_count != 1) {
-			printk("trying to free block (%04x:%d), count=%d\n",
+			printk(" [FS] Warn: freeing busy block (%04x:%d), count=%d\n\r",
 				dev,block,bh->b_count);
 			return;
 		}
@@ -64,6 +77,10 @@ void free_block(int dev, int block)
 	sb->s_zmap[block/8192]->b_dirt = 1;
 }
 
+/*
+ * new_block: Allocates a new physical disk block from the zone bitmap.
+ * new_block: 존 비트맵에서 새로운 물리적 디스크 블록을 할당합니다.
+ */
 int new_block(int dev)
 {
 	struct buffer_head * bh;
@@ -97,6 +114,10 @@ int new_block(int dev)
 	return j;
 }
 
+/*
+ * free_inode: Marks an inode as free in the inode bitmap.
+ * free_inode: 아이노드 비트맵에서 아이노드를 빈 상태로 표시합니다.
+ */
 void free_inode(struct m_inode * inode)
 {
 	struct super_block * sb;
@@ -126,6 +147,10 @@ void free_inode(struct m_inode * inode)
 	memset(inode,0,sizeof(*inode));
 }
 
+/*
+ * new_inode: Allocates a new inode from the inode bitmap.
+ * new_inode: 아이노드 비트맵에서 새로운 아이노드를 할당합니다.
+ */
 struct m_inode * new_inode(int dev)
 {
 	struct m_inode * inode;
